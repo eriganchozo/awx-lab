@@ -1,0 +1,21 @@
+---
+- name: Create file on network device
+  hosts: all
+  connection: ansible.netcommon.network_cli
+  gather_facts: false
+
+  tasks:
+    - name: Create configuration file
+      cli_command:
+        command: |
+          configure terminal
+          file prompt quiet
+          end
+      register: config_output
+
+    - name: Write content to file
+      cli_config:
+        config: |
+          hostname {{ inventory_hostname }}
+          banner motd "Archivo creado por Ansible"
+        save_when: modified   
