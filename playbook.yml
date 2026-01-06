@@ -1,20 +1,15 @@
 ---
-- name: Create file on device
+- name: Crear archivo de texto
   hosts: all
-  connection: ansible.netcommon.network_cli
   gather_facts: false
 
   tasks:
-    - name: Create configuration file
-      ansible.netcommon.cli_command:
-        command: |
-          configure terminal
-          file prompt quiet
-          end
+    - name: Crear archivo en directorio temporal
+      ansible.builtin.shell: |
+        echo "Archivo creado con Ansible" > /tmp/demo-file.txt
+      register: result
 
-    - name: Write content to file
-      ansible.netcommon.cli_config:
-        config: |
-          hostname {{ inventory_hostname }}
-          banner motd "Archivo creado por Ansible"
-        save_when: modified   
+    - name: Confirmar creación
+      ansible.builtin.debug:
+        msg: "El archivo fue creado exitosamente en {{ inventory_hostname }}"
+      when: result.rc == 0
