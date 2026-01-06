@@ -1,0 +1,14 @@
+---
+- name: Crear archivo de texto
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Crear archivo en directorio temporal
+      ansible.builtin.shell: |
+        echo "Archivo creado con Ansible" > /tmp/demo-file.txt
+      register: result
+
+    - name: Confirmar creación
+      ansible.builtin.debug:
+        msg: "El archivo fue creado exitosamente en {{ inventory_hostname }}"
+      when: result.rc == 0
