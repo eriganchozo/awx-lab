@@ -4,12 +4,11 @@
   gather_facts: false
 
   tasks:
-    - name: Crear archivo de demostración
+    - name: Crear archivo en routers
       ansible.builtin.copy:
         content: |
           Dispositivo: {{ inventory_hostname }}
           IP: {{ primary_ip4 | default('No configurada') }}
-          Sitio: {{ sites[0] | default('No definido') }}
           Tipo: {{ device_types[0] | default('No definido') }}
           Rol: {{ device_roles[0] | default('No definido') }}
           Estado: {{ status.value | default('No definido') }}
