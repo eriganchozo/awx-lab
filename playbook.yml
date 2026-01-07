@@ -2,7 +2,6 @@
 - name: Demo AWX con inventario dinámico NetBox
   hosts: all
   gather_facts: false
-  connection: local
 
   tasks:
     - name: Crear archivo de demostración
@@ -10,7 +9,9 @@
         content: |
           Dispositivo: {{ inventory_hostname }}
           IP: {{ primary_ip4 | default('No configurada') }}
+          Sitio: {{ sites[0] | default('No definido') }}
           Tipo: {{ device_types[0] | default('No definido') }}
+          Rol: {{ device_roles[0] | default('No definido') }}
           Estado: {{ status.value | default('No definido') }}
                     
         dest: "/tmp/awx-netbox-demo-{{ inventory_hostname }}.txt"
