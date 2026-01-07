@@ -1,0 +1,19 @@
+---
+- name: Test de conectividad básica
+  hosts: all
+  gather_facts: false
+  
+  tasks:
+    - name: Ping test
+      ansible.builtin.ping:
+      register: ping_result
+      
+    - name: Mostrar hosts alcanzables
+      ansible.builtin.debug:
+        msg: "✅ Host {{ inventory_hostname }} está alcanzable"
+      when: ping_result is succeeded
+      
+    - name: Mostrar hosts no alcanzables  
+      ansible.builtin.debug:
+        msg: "❌ Host {{ inventory_hostname }} NO está alcanzable"
+      when: ping_result is failed
