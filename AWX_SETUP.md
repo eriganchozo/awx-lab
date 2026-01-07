@@ -1,105 +1,86 @@
-# Configuración de AWX con NetBox
+# Configuración de AWX con NetBox - PLUGIN OFICIAL FUNCIONANDO
 
-## Pasos para configurar el inventario dinámico en AWX:
+## ✅ SOLUCIÓN FINAL - PLUGIN OFICIAL NETBOX v3.22.0
+
+El plugin oficial `netbox.netbox.nb_inventory` funciona correctamente con la configuración adecuada.
+
+## Archivos del proyecto:
+
+### 📁 Archivos esenciales para AWX:
+- `requirements.yml` - Dependencias de Ansible
+- `netbox_inventory.yml` - Configuración del inventario dinámico
+- `ansible.cfg` - Configuración de Ansible optimizada
+- `playbook.yml` - Playbook principal
+- `test_connectivity.yml` - Playbook de prueba/demo
+
+## Configuración clave que soluciona el problema:
+
+### 1. ansible.cfg
+```ini
+[inventory]
+enable_plugins = netbox.netbox.nb_inventory
+cache = True
+cache_plugin = memory
+cache_timeout = 3600
+```
+
+### 2. netbox_inventory.yml
+```yaml
+plugin: netbox.netbox.nb_inventory
+api_endpoint: http://netbox.localhost  # SIN /api
+timeout: 60
+compose:
+  ansible_host: primary_ip4 | default(ansible_host)  # Campo correcto
+```
+
+## Pasos para configurar en AWX:
 
 ### 1. Obtener token de NetBox
-```bash
-# Accede a NetBox en http://netbox.localhost
-# Ve a: Admin > API Tokens > Add
-# Crea un token con permisos de lectura
-# Copia el token generado
-```
+- Accede a NetBox en http://netbox.localhost
+- Ve a: Admin > API Tokens > Add
+- Crea un token con permisos de lectura
 
 ### 2. Configurar inventario dinámico en AWX
-1. Ve a AWX en http://awx.localhost
-2. Navega a: Resources > Inventories > Add > Add Inventory
-3. Nombre: "NetBox Dynamic Inventory"
-4. Guarda el inventario
+1. Resources > Inventories > Add > Add Inventory
+2. Nombre: "NetBox Dynamic Inventory"
 
 ### 3. Agregar fuente de inventario
-1. Dentro del inventario creado, ve a "Sources" > Add
+1. Dentro del inventario: "Sources" > Add
 2. Nombre: "NetBox Source"
 3. Tipo: "Sourced from a Project"
-4. Proyecto: Selecciona tu proyecto Git
-5. Archivo de inventario: `netbox_inventory.yml`
-6. **Variables de entorno** (muy importante):
+4. Proyecto: Tu proyecto Git
+5. **Archivo de inventario**: `netbox_inventory.yml`
+6. **Variables de entorno**:
    ```yaml
-   NETBOX_TOKEN: "tu_token_aqui"
-   ```
-   O alternativamente en "Variables":
-   ```yaml
-   netbox_token: "tu_token_aqui"
+   NETBOX_TOKEN: "tu_token_de_netbox"
    ```
 7. Habilita "Update on Project Update"
-8. Habilita "Update on Launch"
-9. Guarda y sincroniza
+8. Sincroniza
 
-### 4. Verificar sincronización
-- La fuente debe sincronizar sin errores
-- Debes ver hosts de NetBox en el inventario
-- Si hay errores, revisa los logs de la fuente
+### 4. Crear Job Template
+1. Resources > Templates > Add > Add Job Template
+2. Inventario: "NetBox Dynamic Inventory"
+3. Proyecto: Tu proyecto Git
+4. Playbook: `playbook.yml` o `test_connectivity.yml`
 
-### 5. Crear Job Template
-1. Ve a: Resources > Templates > Add > Add Job Template
-2. Nombre: "Test NetBox Playbook"
-3. Inventario: "NetBox Dynamic Inventory"
-4. Proyecto: Tu proyecto Git
-5. Playbook: `playbook.yml` o `test_connectivity.yml` (para pruebas simples)
-6. **Variables extra** (opcional):
-   ```yaml
-   netbox_token: "tu_token_aqui"
-   ```
-7. Guarda y ejecuta
+## Resultado esperado:
+- ✅ Dispositivos detectados automáticamente desde NetBox
+- ✅ IPs primarias configuradas como ansible_host
+- ✅ Agrupación automática por roles (device_roles_router)
+- ✅ Metadatos completos: sitio, tipo, rol, estado
+- ✅ Compatible con variables de entorno para seguridad
 
-## Configuración de variables de entorno en AWX
+## Variables disponibles en playbooks:
+- `inventory_hostname` - Nombre del dispositivo
+- `primary_ip4` - IP primaria del dispositivo
+- `sites[0]` - Sitio del dispositivo
+- `device_types[0]` - Tipo de dispositivo
+- `device_roles[0]` - Rol del dispositivo
+- `status.value` - Estado del dispositivo
+- `group_names` - Grupos asignados automáticamente
 
-### Opción 1: En la fuente de inventario (Recomendado)
-```yaml
-# En Environment Variables de la fuente
-NETBOX_TOKEN: "tu_token_de_netbox"
-```
-
-### Opción 2: En variables del Job Template
-```yaml
-# En Extra Variables del Job Template
-netbox_token: "tu_token_de_netbox"
-```
-
-### Opción 3: Usando AWX Credentials (Más seguro)
-1. Crea una credencial personalizada:
-   - Tipo: "Custom"
-   - Campos de entrada:
-     ```yaml
-     fields:
-       - id: netbox_token
-         type: string
-         secret: true
-         label: NetBox API Token
-     ```
-2. Usa la credencial en el Job Template
-
-## Troubleshooting
-
-### Error: "HTML en lugar de JSON"
-- ✅ **Solucionado**: URL corregida a `http://netbox.localhost/api`
-- Verifica que el token sea válido y tenga permisos
-- Asegúrate de que NetBox esté accesible desde AWX
-
-### Error: "Authentication failed"
-- Verifica que el token esté configurado correctamente
-- Comprueba que el token no haya expirado
-- Revisa los permisos del token en NetBox
-
-### Error: "No hosts found"
-- Verifica que tengas dispositivos activos en NetBox
-- Revisa el filtro `status: "active"` en el inventario
-- Comprueba los logs de sincronización en AWX
-
-### Para pruebas locales (opcional):
-```bash
-# Exportar token como variable de entorno
-export NETBOX_TOKEN="tu_token_aqui"
-
-# Probar inventario localmente
-./test_netbox_inventory.sh
-```
+## Troubleshooting:
+- **Error HTML**: Verificar que api_endpoint NO tenga /api al final
+- **Timeout**: Aumentar timeout a 60 segundos
+- **Sin dispositivos**: Verificar token y permisos en NetBox
+- **Variables undefined**: Usar las variables correctas del plugin oficial

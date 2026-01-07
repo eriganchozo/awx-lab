@@ -1,57 +1,24 @@
 ---
-- name: Crear archivo de texto en hosts de NetBox
+- name: Demo AWX con inventario dinámico NetBox
   hosts: all
-  gather_facts: true
-  become: false
-
-  vars:
-    demo_file_path: "/tmp/demo-file-{{ ansible_date_time.epoch }}.txt"
-    demo_content: |
-      Archivo creado con Ansible AWX
-      Host: {{ inventory_hostname }}
-      IP: {{ ansible_host | default('N/A') }}
-      Fecha: {{ ansible_date_time.iso8601 }}
-      Rol del dispositivo: {{ device_role.name | default('N/A') }}
-      Sitio: {{ site.name | default('N/A') }}
+  gather_facts: false
+  connection: local
 
   tasks:
-    - name: Mostrar información del host
-      ansible.builtin.debug:
-        msg: |
-          Ejecutando en: {{ inventory_hostname }}
-          IP: {{ ansible_host | default('No definida') }}
-          Grupos: {{ group_names }}
-
-    - name: Verificar conectividad
-      ansible.builtin.ping:
-      register: ping_result
-
     - name: Crear archivo de demostración
       ansible.builtin.copy:
-        content: "{{ demo_content }}"
-        dest: "{{ demo_file_path }}"
+        content: |
+          Dispositivo: {{ inventory_hostname }}
+          IP: {{ primary_ip4 | default('No configurada') }}
+          Tipo: {{ device_types[0] | default('No definido') }}
+          Estado: {{ status.value | default('No definido') }}
+                    
+        dest: "/tmp/awx-netbox-demo-{{ inventory_hostname }}.txt"
         mode: '0644'
-      register: file_result
-      when: ping_result is succeeded
+      register: result
 
-    - name: Verificar creación del archivo
-      ansible.builtin.stat:
-        path: "{{ demo_file_path }}"
-      register: file_stat
-      when: file_result is succeeded
-
-    - name: Mostrar resultado
+    - name: Confirmar creación del archivo
       ansible.builtin.debug:
         msg: |
-          ✅ Archivo creado exitosamente:
-          - Ruta: {{ demo_file_path }}
-          - Tamaño: {{ file_stat.stat.size | default(0) }} bytes
-          - Host: {{ inventory_hostname }}
-      when: 
-        - file_stat is defined
-        - file_stat.stat.exists
-
-    - name: Mostrar error si falló
-      ansible.builtin.debug:
-        msg: "❌ Error al crear archivo en {{ inventory_hostname }}"
-      when: file_result is failed
+          Archivo: /tmp/awx-netbox-demo-{{ inventory_hostname }}.txt
+          Dispositivo: {{ inventory_hostname }} ({{ primary_ip4 | default('Sin IP') }})

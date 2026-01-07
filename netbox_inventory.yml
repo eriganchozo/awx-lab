@@ -1,21 +1,16 @@
 ---
 plugin: netbox.netbox.nb_inventory
-api_endpoint: http://netbox.localhost/api
+api_endpoint: http://netbox.localhost
 token: "{{ lookup('env', 'NETBOX_TOKEN') | default(netbox_token) }}"
 validate_certs: false
 config_context: false
 flatten_custom_fields: true
+timeout: 60
 group_by:
   - device_roles
-  - device_types
-  - sites
 compose:
-  ansible_host: primary_ip.address | default(ansible_host)
+  ansible_host: primary_ip4 | default(ansible_host)
 keyed_groups:
   - key: device_role.slug
     prefix: role
-  - key: site.slug  
-    prefix: site
-filters:
-  - status: "active"
 

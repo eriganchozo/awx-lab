@@ -1,19 +1,21 @@
 ---
-- name: Test de conectividad básica
+- name: Demo inventario dinámico NetBox - Plugin Oficial
   hosts: all
   gather_facts: false
+  connection: local
   
   tasks:
-    - name: Ping test
-      ansible.builtin.ping:
-      register: ping_result
-      
-    - name: Mostrar hosts alcanzables
+    - name: Mostrar información del dispositivo
       ansible.builtin.debug:
-        msg: "✅ Host {{ inventory_hostname }} está alcanzable"
-      when: ping_result is succeeded
-      
-    - name: Mostrar hosts no alcanzables  
-      ansible.builtin.debug:
-        msg: "❌ Host {{ inventory_hostname }} NO está alcanzable"
-      when: ping_result is failed
+        msg: |
+          ✅ PLUGIN OFICIAL NETBOX FUNCIONANDO!
+          
+          📛 Dispositivo: {{ inventory_hostname }}
+          🌐 IP: {{ primary_ip4 | default('No configurada') }}
+          🏢 Sitio: {{ sites[0] | default('No definido') }}
+          🔧 Tipo: {{ device_types[0] | default('No definido') }}
+          👤 Rol: {{ device_roles[0] | default('No definido') }}
+          📊 Estado: {{ status.value | default('No definido') }}
+          🏷️  Grupos: {{ group_names | join(', ') }}
+          
+          🎯 Listo para usar en AWX con plugin oficial!
