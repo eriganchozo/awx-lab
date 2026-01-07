@@ -4,33 +4,20 @@
 
 El plugin oficial `netbox.netbox.nb_inventory` funciona correctamente con la configuración adecuada.
 
-## Archivos del proyecto:
+## Estructura del proyecto:
 
-### 📁 Archivos esenciales para AWX:
-- `requirements.yml` - Dependencias de Ansible
-- `netbox_inventory.yml` - Configuración del inventario dinámico
-- `ansible.cfg` - Configuración de Ansible optimizada
-- `playbook.yml` - Playbook principal
-- `test_connectivity.yml` - Playbook de prueba/demo
-
-## Configuración clave que soluciona el problema:
-
-### 1. ansible.cfg
-```ini
-[inventory]
-enable_plugins = netbox.netbox.nb_inventory
-cache = True
-cache_plugin = memory
-cache_timeout = 3600
 ```
-
-### 2. netbox_inventory.yml
-```yaml
-plugin: netbox.netbox.nb_inventory
-api_endpoint: http://netbox.localhost  # SIN /api
-timeout: 60
-compose:
-  ansible_host: primary_ip4 | default(ansible_host)  # Campo correcto
+awx-netbox-integration/
+├── README.md
+├── ansible.cfg                     # Configuración Ansible
+├── requirements.yml                # Dependencias (netbox.netbox v3.22.0)
+├── inventories/
+│   └── netbox_inventory.yml       # Inventario dinámico NetBox
+├── playbooks/
+│   ├── playbook.yml               # Playbook principal
+│   └── test_connectivity.yml      # Playbook de prueba
+└── docs/
+    └── AWX_SETUP.md               # Documentación completa
 ```
 
 ## Pasos para configurar en AWX:
@@ -49,48 +36,20 @@ compose:
 2. Nombre: "NetBox Source"
 3. Tipo: "Sourced from a Project"
 4. Proyecto: Tu proyecto Git
-5. **Archivo de inventario**: `netbox_inventory.yml`
+5. **Archivo de inventario**: `inventories/netbox_inventory.yml`
 6. **Variables de entorno** (CRÍTICO para conectividad):
    ```yaml
    NETBOX_TOKEN: "tu_token_de_netbox"
    NETBOX_URL: "http://netbox.netbox.svc.cluster.local"
    ```
-   **Alternativas de URL si la anterior no funciona:**
-   - `http://netbox.localhost`
-   - `http://netbox:8000`
-   - `http://172.19.0.3:31744` (tu IP específica)
 7. Habilita "Update on Project Update"
 8. Sincroniza
-
-### 4. Troubleshooting de conectividad en AWX
-
-Si obtienes `Connection refused`, prueba estas URLs en orden:
-
-1. **Primera opción** (Kubernetes service):
-   ```yaml
-   NETBOX_URL: "http://netbox.netbox.svc.cluster.local"
-   ```
-
-2. **Segunda opción** (localhost):
-   ```yaml
-   NETBOX_URL: "http://netbox.localhost"
-   ```
-
-3. **Tercera opción** (IP directa):
-   ```yaml
-   NETBOX_URL: "http://172.19.0.3:31744"
-   ```
-
-4. **Cuarta opción** (nombre del servicio):
-   ```yaml
-   NETBOX_URL: "http://netbox:8000"
-   ```
 
 ### 4. Crear Job Template
 1. Resources > Templates > Add > Add Job Template
 2. Inventario: "NetBox Dynamic Inventory"
 3. Proyecto: Tu proyecto Git
-4. Playbook: `playbook.yml` o `test_connectivity.yml`
+4. **Playbook**: `playbooks/playbook.yml`
 
 ## Resultado esperado:
 - ✅ Dispositivos detectados automáticamente desde NetBox
