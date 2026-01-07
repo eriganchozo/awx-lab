@@ -1,4 +1,3 @@
----
 - name: Crear archivo de texto
   hosts: all
   gather_facts: false
