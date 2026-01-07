@@ -50,12 +50,41 @@ compose:
 3. Tipo: "Sourced from a Project"
 4. Proyecto: Tu proyecto Git
 5. **Archivo de inventario**: `netbox_inventory.yml`
-6. **Variables de entorno**:
+6. **Variables de entorno** (CRÍTICO para conectividad):
    ```yaml
    NETBOX_TOKEN: "tu_token_de_netbox"
+   NETBOX_URL: "http://netbox.netbox.svc.cluster.local"
    ```
+   **Alternativas de URL si la anterior no funciona:**
+   - `http://netbox.localhost`
+   - `http://netbox:8000`
+   - `http://172.19.0.3:31744` (tu IP específica)
 7. Habilita "Update on Project Update"
 8. Sincroniza
+
+### 4. Troubleshooting de conectividad en AWX
+
+Si obtienes `Connection refused`, prueba estas URLs en orden:
+
+1. **Primera opción** (Kubernetes service):
+   ```yaml
+   NETBOX_URL: "http://netbox.netbox.svc.cluster.local"
+   ```
+
+2. **Segunda opción** (localhost):
+   ```yaml
+   NETBOX_URL: "http://netbox.localhost"
+   ```
+
+3. **Tercera opción** (IP directa):
+   ```yaml
+   NETBOX_URL: "http://172.19.0.3:31744"
+   ```
+
+4. **Cuarta opción** (nombre del servicio):
+   ```yaml
+   NETBOX_URL: "http://netbox:8000"
+   ```
 
 ### 4. Crear Job Template
 1. Resources > Templates > Add > Add Job Template
