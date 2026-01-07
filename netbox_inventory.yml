@@ -1,7 +1,6 @@
 ---
 plugin: netbox.netbox.nb_inventory
 api_endpoint: http://netbox.netbox.svc.cluster.local
-token: "{{ lookup('env', 'NETBOX_TOKEN') }}"
 validate_certs: false
 config_context: false
 flatten_custom_fields: true
