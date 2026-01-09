@@ -3,15 +3,7 @@
   hosts: all
   gather_facts: false
 
-  tasks:
-    - name: Extract clean IP from NetBox
-      set_fact:
-        clean_ip: "{{ primary_ip4.split('/')[0] if primary_ip4 and '/' in primary_ip4 else primary_ip4 | default(inventory_hostname) }}"
-
-    - name: Set connection IP
-      set_fact:
-        ansible_host: "{{ clean_ip }}"
-        
+  tasks:        
     - name: Create demo file on device
       raw: 'echo "AWX + NetBox Demo - Device: {{ inventory_hostname }} - IP: {{ ansible_host }}" > /tmp/awx-demo-{{ inventory_hostname }}.txt'
       register: file_creation
