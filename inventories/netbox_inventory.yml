@@ -7,7 +7,7 @@ timeout: 60
 group_by:
   - device_roles
 compose:
-  ansible_host: primary_ip4 | default(ansible_host)
+  ansible_host: primary_ip4.split('/')[0] if primary_ip4 else ansible_host
 keyed_groups:
   - key: device_role.slug
     prefix: role
