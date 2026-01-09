@@ -1,24 +1,33 @@
 ---
-- name: Demo AWX con inventario dinámico NetBox
+- name: AWX + NetBox Dynamic Inventory Demo
   hosts: all
   gather_facts: false
 
   tasks:
-    - name: Crear archivo en routers
-      ansible.builtin.copy:
-        content: |
-          Dispositivo: {{ inventory_hostname }}
-          IP: {{ primary_ip4 | default('No configurada') }}
-          Tipo: {{ device_types[0] | default('No definido') }}
-          Rol: {{ device_roles[0] | default('No definido') }}
-          Estado: {{ status.value | default('No definido') }}
-                    
-        dest: "/tmp/awx-netbox-demo-{{ inventory_hostname }}.txt"
-        mode: '0644'
-      register: result
+    - name: Extract clean IP from NetBox
+      set_fact:
+        clean_ip: "{{ primary_ip4.split('/')[0] if primary_ip4 and '/' in primary_ip4 else primary_ip4 | default(inventory_hostname) }}"
 
-    - name: Confirmar creación del archivo
-      ansible.builtin.debug:
+    - name: Set connection IP
+      set_fact:
+        ansible_host: "{{ clean_ip }}"
+        
+    - name: Create demo file on device
+      raw: 'echo "AWX + NetBox Demo - Device: {{ inventory_hostname }} - IP: {{ ansible_host }}" > /tmp/awx-demo-{{ inventory_hostname }}.txt'
+      register: file_creation
+
+    - name: Verify file creation
+      raw: 'file cat /tmp/awx-demo-{{ inventory_hostname }}.txt'
+      register: file_content
+      when: not file_creation.failed
+
+    - name: Show result
+      debug:
         msg: |
-          Archivo: /tmp/awx-netbox-demo-{{ inventory_hostname }}.txt
-          Dispositivo: {{ inventory_hostname }} ({{ primary_ip4 | default('Sin IP') }})
+          Device: {{ inventory_hostname }} ({{ ansible_host }})
+          {% if file_creation.failed %}
+          Failed to create file
+          {% else %}
+          File created: /tmp/awx-demo-{{ inventory_hostname }}.txt
+          Content: {{ file_content.stdout | default('Could not read file') }}
+          {% endif %}
