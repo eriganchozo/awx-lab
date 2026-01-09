@@ -3,12 +3,3 @@ plugin: netbox.netbox.nb_inventory
 api_endpoint: http://demo-lab-netbox-1:8080
 token: "{{ lookup('env', 'NETBOX_TOKEN') }}"
 validate_certs: false
-timeout: 60
-group_by:
-  - device_roles
-compose:
-  ansible_host: primary_ip4 | default(ansible_host)
-keyed_groups:
-  - key: device_role.slug
-    prefix: role
-
