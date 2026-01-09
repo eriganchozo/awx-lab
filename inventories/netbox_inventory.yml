@@ -1,5 +1,5 @@
 ---
 plugin: netbox.netbox.nb_inventory
 api_endpoint: http://demo-lab-netbox-1:8080
-token: "{{ lookup('env', 'NETBOX_TOKEN') }}"
+token: c44b12ff3074fb90de92d25255f5fc22f2cb752f
 validate_certs: false
