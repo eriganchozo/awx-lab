@@ -4,22 +4,23 @@
   gather_facts: false
 
   tasks:        
-    - name: Create demo file on device
-      raw: 'echo "AWX + NetBox Demo - Device: {{ inventory_hostname }} - IP: {{ ansible_host }}" > /tmp/awx-demo-{{ inventory_hostname }}.txt'
-      register: file_creation
+    - name: Check if file exists
+      raw: 'test -f /tmp/awx-demo-{{ inventory_hostname }}.txt'
+      register: file_exists
+      failed_when: false
+      changed_when: false
 
-    - name: Verify file creation
-      raw: 'file cat /tmp/awx-demo-{{ inventory_hostname }}.txt'
-      register: file_content
-      when: not file_creation.failed
+    - name: Create file if not exists
+      raw: 'echo "AWX Demo - {{ inventory_hostname }} - {{ ansible_host }}" > /tmp/awx-demo-{{ inventory_hostname }}.txt'
+      when: file_exists.rc != 0
 
     - name: Show result
       debug:
         msg: |
           Device: {{ inventory_hostname }} ({{ ansible_host }})
-          {% if file_creation.failed %}
-          Failed to create file
+          {% if file_exists.rc == 0 %}
+          Status: File already existed
           {% else %}
-          File created: /tmp/awx-demo-{{ inventory_hostname }}.txt
-          Content: {{ file_content.stdout | default('Could not read file') }}
+          Status: File created
           {% endif %}
+          Content: {{ file_content.stdout }}
