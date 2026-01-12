@@ -22,5 +22,4 @@
           Status: File already existed
           {% else %}
           Status: File created
-          {% endif %}
-          Content: {{ file_content.stdout }}
+ 
