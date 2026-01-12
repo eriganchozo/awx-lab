@@ -1,9 +1,10 @@
 ---
 plugin: netbox.netbox.nb_inventory
 api_endpoint: http://demo-lab-netbox-1:8080
-token: "{{ lookup('env', 'NETBOX_TOKEN') }}"
 validate_certs: false
 timeout: 60
+env:
+  NETBOX_TOKEN: "{{ NETBOX_TOKEN }}"
 group_by:
   - device_roles
 compose:
