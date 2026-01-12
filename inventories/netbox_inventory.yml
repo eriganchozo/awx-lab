@@ -1,6 +1,7 @@
 ---
 plugin: netbox.netbox.nb_inventory
 api_endpoint: http://demo-lab-netbox-1:8080
+token: "{{ netbox_token }}"
 validate_certs: false
 timeout: 60
 group_by:
