@@ -12,8 +12,4 @@
       debug:
         msg: |
           Device: {{ inventory_hostname }} ({{ ansible_host }})
-          {% if file_creation.failed %}
-          Failed to create file
-          {% else %}
           File created: /tmp/awx-demo-{{ inventory_hostname }}.txt
-          {% endif %}
