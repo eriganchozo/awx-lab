@@ -4,17 +4,10 @@
   gather_facts: false
 
   tasks:        
-    - name: Create file only if not exists
-      raw: 'test -f /tmp/awx-demo-{{ inventory_hostname }}.txt || echo "AWX Demo - {{ inventory_hostname }} - {{ ansible_host }}" > /tmp/awx-demo-{{ inventory_hostname }}.txt'
-      register: result
-      changed_when: "'AWX Demo' in result.stdout"
-
-    - name: Show file content
-      raw: 'cat /tmp/awx-demo-{{ inventory_hostname }}.txt'
-      register: file_content
-      changed_when: false
+    - name: Create file
+      raw: 'echo "AWX Demo - {{ inventory_hostname }} - {{ ansible_host }}" > /tmp/awx-demo-{{ inventory_hostname }}.txt'
+      when: file_exists.rc != 0
 
     - name: Show result
       debug:
         msg: "{{ inventory_hostname }} ({{ ansible_host }}): {{ file_content.stdout }}"
- 
