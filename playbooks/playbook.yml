@@ -5,13 +5,8 @@
 
   tasks:        
     - name: Create demo file on device
-      raw: 'echo "AWX + NetBox Demo - Device: {{ inventory_hostname }} - IP: {{ ansible_host }}" > /tmp/awx-demo-{{ inventory_hostname }}.txt'
+      raw: 'bash -c "echo \"AWX + NetBox Demo - Device: {{ inventory_hostname }} - IP: {{ ansible_host }}\" > /tmp/awx-demo-{{ inventory_hostname }}.txt"'
       register: file_creation
-
-    - name: Verify file creation
-      raw: 'file cat /tmp/awx-demo-{{ inventory_hostname }}.txt'
-      register: file_content
-      when: not file_creation.failed
 
     - name: Show result
       debug:
@@ -21,5 +16,4 @@
           Failed to create file
           {% else %}
           File created: /tmp/awx-demo-{{ inventory_hostname }}.txt
-          Content: {{ file_content.stdout | default('Could not read file') }}
           {% endif %}
