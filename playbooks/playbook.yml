@@ -6,7 +6,6 @@
   tasks:        
     - name: Create file
       raw: 'echo "AWX Demo - {{ inventory_hostname }} - {{ ansible_host }}" > /tmp/awx-demo-{{ inventory_hostname }}.txt'
-      when: file_exists.rc != 0
 
     - name: Show result
       debug:
